@@ -1,44 +1,78 @@
-const addToCartBtn = document.getElementById("addToCart");
+const addToCartBtn = document.querySelector(".addToCart");
 let modeloProducto = document.querySelector(".modelo").innerText;
 let marcaProducto = document.querySelector(".marca").innerText;
 let precioProducto = document.querySelector(".precio").innerText;
 let descripcionProducto = document.querySelector(".descripcion").innerText;
 let imgProducto = document.querySelector("img").src;
-let precioNuevo = precioProducto.split("$")[1]
+let precioNuevo = precioProducto.split("$")[1];
 
+//let productsInCart = JSON.parse(localStorage.getItem("cart"));
+// productsInCart ? productsInCart : (productsInCart = []);
 let producto = {
     modelo: modeloProducto,
     marca: marcaProducto,
     precio: precioNuevo,
     descripcion: precioProducto,
     img: imgProducto,
-    count: 1,
 };
-
 let productsInCart = JSON.parse(localStorage.getItem("cart"));
-productsInCart ? productsInCart : productsInCart = [];
-
-
+productsInCart ? productsInCart : (productsInCart = []);
 
 addToCartBtn.addEventListener("click", (e) => {
-    console.log(productsInCart);
-    console.log(e.target.class)
-    productsInCart.forEach(producto => {
+    let id = e.target.id;
+    let productCoincide = false;
+    let productoEncontrado;
 
-        if (e.target.class == producto.modelo) {
-            producto.count++
+    productsInCart.forEach((p) => {
+        if (p.modelo == id) {
+            productCoincide = true;
+            productoEncontrado = p;
         }
-
     });
-    productsInCart.push(producto);
+    console.log(productCoincide);
 
-    localStorage.setItem("cart", JSON.stringify(productsInCart));
-    console.log(productsInCart);
+    if (productCoincide) {
+        productoEncontrado.count++;
 
-    window.location.href = "/producto/carrito"
+        let arrayNuevo = productsInCart.filter((p) => p != productoEncontrado);
+
+        arrayNuevo.push(productoEncontrado);
+        localStorage.setItem("cart", JSON.stringify(productsInCart));
+
+        console.log("count count");
+    } else {
+        producto.count = 1;
+        productsInCart.push(producto);
+        localStorage.setItem("cart", JSON.stringify(productsInCart));
+    }
+
+    /* else {
+        console.log(productsInCart.length);
+
+        for (let product of productsInCart) {
+            if (id == product.modelo) {
+                product.count++;
+            }
+        }
+        productsInCart.push(producto);
+        localStorage.setItem("cart", JSON.stringify(productsInCart));
+    } */
+    console.log(JSON.parse(localStorage.getItem("cart")));
 });
 
-
+/*roductsInCart.forEach((asd) => {
+        console.log(id);
+        if (id == asd.modelo) {
+            asd.count++;
+            localStorage.setItem("cart", JSON.stringify(productsInCart));
+            return;
+            //productsInCart.pop(asd.modelo)
+            let newProducts = JSON.parse(localStorage.getItem("cart"));
+            console.log(JSON.parse(localStorage.getItem("cart")));
+        }
+    });
+    */
+//window.location.href = "/producto/carrito"
 
 /*
 // Create an array to store the items in the cart
