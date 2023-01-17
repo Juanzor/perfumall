@@ -1,23 +1,39 @@
 const db = require("../database/models");
+const mercadopago = require("mercadopago");
 let controller = {
     carrito: (req, res) => {
         res.render("carrito");
     },
+    detalle: async (req, res) => {
+        let preference = {
+            items: [],
+        };
+        const { id } = req.params;
 
-    detalle: (req, res) => {
-        let producto;
+        try {
+            const producto = await db.Producto.findByPk(id, { include: "marca" });
+            if (producto.stock > 0) {
+                preference.items.push({
+                    title: producto.modelo,
+                    unit_price: producto.precio,
+                    quantity: 1,
+                });
+            } else throw new Error("No hay stock");
 
-        db.Producto.findByPk(req.params.id, { include: "marca" })
-            .then((result) => (producto = result))
-            .then((result) => res.render("detalle", { producto }))
-            .catch((e) => res.send(e));
+            const response = await mercadopago.preferences.create(preference);
+            const preferenceId = response.body.id;
+            console.log(preferenceId);
+            return res.render("detalle", { preferenceId, producto });
+        } catch (error) {
+            res.send(error.message);
+            console.log(error);
+        }
     },
     nuevoProducto: async (req, res) => {
         let marcas = await db.Marca.findAll();
 
         res.render("crear-producto", { marcas: marcas });
     },
-
     store: (req, res) => {
         let estado;
         let descuento = 0;

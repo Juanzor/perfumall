@@ -15,24 +15,15 @@
 
 <body>
     <%- include('./partials/header') %>
-        <main class="main ">
+
+        <main class="main">
             <div class="carta container">
                 <div class="salome">
-                    <div class="breadcrumb">
-                        <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item">
-                                    <a href="/" class="breadcrumb-item">Home</a>
-                                </li>
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    <%=producto.modelo %>
-                                </li>
-                            </ol>
-                        </nav>
-                    </div>
+                    <div class="breadcrumb"></div>
                     <img class="img-img img" src="/img/NuevoProducto/<%= producto.imagen %>"
                         alt="Trendy Pants and Shoes" />
                 </div>
+
                 <div class="descripciones-info">
                     <div>
                         <h1 class="modelo">
@@ -41,27 +32,32 @@
                         <h2 class="marca">
                             <%= producto.marca.nombre %>
                         </h2>
-                        <h2 class="precio">$<%= producto.precio %>
-                        </h2>
+                        <% if (producto.estado==1) { %>
+                            <h2 class="precio">$<%= producto.precio - (producto.precio * producto.descuento * 0.010) %>
+                            </h2>
+                            <% } else { %>
+                                <h2 class="precio">$ <%= producto.precio %>
+                                </h2>
+                                <% } %>
                     </div>
                     <div class="cabeza">
-                        <div class="container text-center">
-                            <div class="row">
-                                <div class="linea my-5"> </div>
-                            </div>
-                        </div>
                         <div class="zobel">
                             <p class="card-text my-5 descripcion">
                                 <%= producto.descripcion %>
                             </p>
-
                         </div>
                     </div>
-                    <div class="bobis">
-                        <div>
+                    <div class="bobis d-flex justify-content-center">
+                        <div class="me-5">
                             <button class="btn btn-secondary addToCart" id="<%= producto.modelo %>">
                                 <i class="fa-solid fa-cart-shopping"></i> Añadir al carrito
                             </button>
+                        </div>
+
+                        <div class="asd">
+                            <form action="/producto/detalle/<%= producto.id %>" method="POST">
+
+                            </form>
                         </div>
 
                         <% if (locals.isAdmin) { %>
@@ -86,10 +82,32 @@
         </main>
 
         <%- include('./partials/footer') %>
+            <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+            <div class="cho-container"></div>
+            <script>
+
+                const mp = new MercadoPago("TEST-f7e88993-f4c8-4d51-8a9b-3b2f75b1f788", {
+                    locale: "es-AR",
+                });
+
+                mp.checkout({
+                    preference: {
+                        id: "<%= preferenceId %>",
+                    },
+                    render: {
+                        container: ".asd",
+                        label: "Comprar",
+                    },
+                });
+                console.log(preference.id);
+
+            </script>
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
                 integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
                 crossorigin="anonymous"></script>
+
 </body>
 
 </html>
