@@ -11,7 +11,9 @@ let controller = {
         const { id } = req.params;
 
         try {
-            const producto = await db.Producto.findByPk(id, { include: "marca" });
+            const producto = await db.Producto.findByPk(id, {
+                include: "marca",
+            });
             if (producto.stock > 0) {
                 preference.items.push({
                     title: producto.modelo,
@@ -22,8 +24,11 @@ let controller = {
 
             const response = await mercadopago.preferences.create(preference);
             const preferenceId = response.body.id;
-            console.log(preferenceId);
-            return res.render("detalle", { preferenceId, producto });
+            return res.render("detalle", {
+                preferenceId,
+                producto,
+                mensajes: req.flash("mensajes"),
+            });
         } catch (error) {
             res.send(error.message);
             console.log(error);
@@ -36,6 +41,7 @@ let controller = {
     },
     store: (req, res) => {
         let estado;
+        let adminId = req.session.userLogged.id;
         let descuento = 0;
         if (req.body.descuento > 0) {
             estado = true;
@@ -54,6 +60,7 @@ let controller = {
             marca_id: req.body.marca,
             estado: estado,
             descripcion: req.body.descripcion,
+            admin_id: adminId,
         })
 
             .then(function (result) {
@@ -67,17 +74,10 @@ let controller = {
             .catch((e) => res.send(e));
     },
 
-    renderizarEditarProducto: (req, res) => {
-        let idProduct = req.params.id;
-
-        db.Producto.findByPk(idProduct)
-            .then((result) => res.render("editar-producto", { producto: result }))
-            .catch((e) => res.send(e));
-    },
-
-    editar: (req, res) => {
-        let idProduct = req.params.id;
+    editar: async (req, res) => {
+        let { idProduct } = req.params;
         let estado;
+        let file = req.file.filename;
         let descuento = 0;
         if (req.body.descuento > 0) {
             estado = true;
@@ -86,37 +86,56 @@ let controller = {
             estado = false;
         }
 
-        db.Producto.update(
-            {
-                precio: req.body.precio,
-                modelo: req.body.modelo,
-                descuento: descuento,
-                imagen: req.file.filename,
-                marca: req.body.marca_id,
-                estado: estado,
-                descripcion: req.body.descripcion,
-            },
-            {
-                where: {
-                    id: idProduct,
+        try {
+            const producto = await db.Producto.findByPk(idProduct);
+            if (!file) file = producto.imagen;
+
+            await db.Producto.update(
+                {
+                    precio: req.body.precio,
+                    modelo: req.body.modelo,
+                    descuento: descuento,
+                    imagen: file,
+                    marca: req.body.marca_id,
+                    estado,
+                    descripcion: req.body.descripcion,
                 },
-            }
-        )
-            .then((result) => res.redirect("/"))
-            .catch((e) => console.log(e));
+                {
+                    where: {
+                        id: idProduct,
+                    },
+                }
+            );
+            res.redirect("/");
+        } catch (error) {
+            console.log(error);
+        }
+    },
+    renderizarEditarProducto: (req, res) => {
+        console.log(req.route.path);
+        let idProduct = req.params.id;
+
+        db.Producto.findByPk(idProduct, { include: "marca" })
+            .then((result) => {
+                res.render("editar-producto", { producto: result });
+            })
+            .catch((e) => res.send(e));
     },
 
-    borrar: (req, res) => {
+    borrar: async (req, res) => {
         const { id } = req.params;
-        db.Producto.destroy({
-            where: {
-                id: id,
-            },
-        })
-            .then(function (result) {
-                if (result) res.redirect("/");
-            })
-            .catch((err) => console.log(err));
+        console.log(req.route.path);
+
+        try {
+            await db.Producto.destroy({
+                where: {
+                    id: id,
+                },
+            });
+            return res.redirect("/usuario/admin");
+        } catch (error) {
+            console.log(error);
+        }
     },
 };
 

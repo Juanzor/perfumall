@@ -21,7 +21,7 @@
                 <div class="salome">
                     <div class="breadcrumb"></div>
                     <img class="img-img img" src="/img/NuevoProducto/<%= producto.imagen %>"
-                        alt="Trendy Pants and Shoes" />
+                        alt="Trendy Pants and Shoes" style="height: 250px" />
                 </div>
 
                 <div class="descripciones-info">
@@ -33,7 +33,8 @@
                             <%= producto.marca.nombre %>
                         </h2>
                         <% if (producto.estado==1) { %>
-                            <h2 class="precio">$<%= producto.precio - (producto.precio * producto.descuento * 0.010) %>
+                            <h2 class="precio">
+                                $<%= producto.precio - (producto.precio * producto.descuento * 0.010) %>
                             </h2>
                             <% } else { %>
                                 <h2 class="precio">$ <%= producto.precio %>
@@ -47,36 +48,51 @@
                             </p>
                         </div>
                     </div>
-                    <div class="bobis d-flex justify-content-center">
-                        <div class="me-5">
-                            <button class="btn btn-secondary addToCart" id="<%= producto.modelo %>">
-                                <i class="fa-solid fa-cart-shopping"></i> Añadir al carrito
-                            </button>
+                    <% mensajes.forEach(m=> { %>
+                        <div class="mensaje alert   mb-2">
+                            <%= m.msg %>
                         </div>
 
-                        <div class="asd">
-                            <form action="/producto/detalle/<%= producto.id %>" method="POST">
+                        <% }) %>
 
-                            </form>
-                        </div>
 
-                        <% if (locals.isAdmin) { %>
-                            <div class="contenedor-navs">
-                                <a href="/producto/editar/<%= producto.id %>" class="btn btn-secondary" role="button"
-                                    aria-disabled="true">Editar</a>
-                            </div>
-                            <% } %>
+                            <div class="bobis d-flex justify-content-center align-items-center">
+                                <div class="me-4">
+                                    <button class="btn btn-secondary addToCart" id="<%= producto.modelo %>">
+                                        <i class="fa-solid fa-cart-shopping"></i> Añadir
+                                        al carrito
+                                    </button>
+                                </div>
+
+                                <div class="asd">
+                                    <form action="/producto/detalle/<%= producto.id %>" method="POST"></form>
+                                </div>
+                                <div class="m-4">
+                                    <form method="POST" action="/usuario/comprar/<%= producto.id %>">
+                                        <button type="submit" class="btn btn-secondary addToCart">
+                                            Comprar
+                                        </button>
+                                    </form>
+                                </div>
+
                                 <% if (locals.isAdmin) { %>
-                                    <div>
-                                        <form action="/producto/borrar/<%= producto.id %>?_method=DELETE" method="POST">
-                                            <button type="submit" class="btn btn-secondary" role="button"
-                                                aria-disabled="true">
-                                                ELIMINAR
-                                            </button>
-                                        </form>
+                                    <div class="contenedor-navs">
+                                        <a href="/producto/editar/<%= producto.id %>" class="btn btn-secondary"
+                                            role="button" aria-disabled="true">Editar</a>
                                     </div>
                                     <% } %>
-                    </div>
+                                        <% if (locals.isAdmin) { %>
+                                            <div>
+                                                <form action="/producto/borrar/<%= producto.id %>?_method=DELETE"
+                                                    method="POST">
+                                                    <button type="submit" class="btn btn-secondary" role="button"
+                                                        aria-disabled="true">
+                                                        ELIMINAR
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <% } %>
+                            </div>
                 </div>
             </div>
         </main>
@@ -86,10 +102,12 @@
 
             <div class="cho-container"></div>
             <script>
-
-                const mp = new MercadoPago("TEST-f7e88993-f4c8-4d51-8a9b-3b2f75b1f788", {
-                    locale: "es-AR",
-                });
+                const mp = new MercadoPago(
+                    "TEST-f7e88993-f4c8-4d51-8a9b-3b2f75b1f788",
+                    {
+                        locale: "es-AR",
+                    }
+                );
 
                 mp.checkout({
                     preference: {
@@ -97,17 +115,15 @@
                     },
                     render: {
                         container: ".asd",
-                        label: "Comprar",
+                        label: "Mercadopago",
                     },
                 });
                 console.log(preference.id);
-
             </script>
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
                 integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
                 crossorigin="anonymous"></script>
-
 </body>
 
 </html>
