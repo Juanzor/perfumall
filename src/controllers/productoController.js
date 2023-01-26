@@ -14,14 +14,12 @@ let controller = {
             const producto = await db.Producto.findByPk(id, {
                 include: "marca",
             });
-            if (producto.stock > 0) {
-                preference.items.push({
-                    title: producto.modelo,
-                    unit_price: producto.precio,
-                    quantity: 1,
-                });
-            } else throw new Error("No hay stock");
 
+            preference.items.push({
+                title: producto.modelo,
+                unit_price: producto.precio,
+                quantity: 1,
+            });
             const response = await mercadopago.preferences.create(preference);
             const preferenceId = response.body.id;
             return res.render("detalle", {
@@ -75,9 +73,10 @@ let controller = {
     },
 
     editar: async (req, res) => {
-        let { idProduct } = req.params;
+        let { id } = req.params;
+        console.log(req.body);
         let estado;
-        let file = req.file.filename;
+        /*  let file = req.file.filename; */
         let descuento = 0;
         if (req.body.descuento > 0) {
             estado = true;
@@ -87,28 +86,49 @@ let controller = {
         }
 
         try {
-            const producto = await db.Producto.findByPk(idProduct);
-            if (!file) file = producto.imagen;
+            /*  const producto = await db.Producto.findByPk(idProduct); */
+            /*   if (!file) file = producto.imagen; */
 
             await db.Producto.update(
                 {
                     precio: req.body.precio,
                     modelo: req.body.modelo,
                     descuento: descuento,
-                    imagen: file,
+                    /*    imagen: file, */
                     marca: req.body.marca_id,
                     estado,
                     descripcion: req.body.descripcion,
                 },
                 {
                     where: {
-                        id: req.params.id,
+                        id,
                     },
                 }
             );
             res.redirect("/");
         } catch (error) {
             console.log(error);
+        }
+    },
+    editarImagen: async (req, res) => {
+        const { id } = req.params;
+        const imagen = req.file.filename;
+
+        try {
+            db.Producto.update(
+                {
+                    imagen,
+                },
+                {
+                    where: {
+                        id,
+                    },
+                }
+            );
+
+            return res.redirect("/");
+        } catch (error) {
+            res.send(error.message);
         }
     },
     renderizarEditarProducto: (req, res) => {
